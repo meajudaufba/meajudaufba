@@ -30,9 +30,11 @@ Ufba.prototype.getWelcome = function(callback) {
 		url: URL_WELCOME,
 		jar: this.jar
 	}, function (err, httpResponse, body) {
-		/*var DOM = cheerio.load(body);
-		var name = DOM('table').html();*/
-		callback(body);
+		var DOM = cheerio.load(body);
+		var name = DOM('table').eq(4).find('tr td center b').html().trim();
+		callback({
+			name: name
+		});
 	});
 };
 
