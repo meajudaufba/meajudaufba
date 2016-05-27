@@ -9,6 +9,7 @@ function Ufba(parameters) {
 	this.username = parameters.username;
 	this.password = parameters.password;
 	this.jar = request.jar();
+	this.logged = false;
 }
 
 Ufba.prototype.login = function(callback) {
@@ -20,6 +21,7 @@ Ufba.prototype.login = function(callback) {
 		}, 
 		jar: this.jar
 	}, function (err, httpResponse, body) {
+		this.logged = true;
 		callback(true);		
 	});
 
