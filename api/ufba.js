@@ -4,6 +4,7 @@ var cheerio = require('cheerio'),
 var URL_LOGIN = 'https://siac.ufba.br/SiacWWW/LogonSubmit.do';
 var URL_WELCOME = 'https://siac.ufba.br/SiacWWW/Welcome.do';
 var URL_TRANSCRIPT = 'https://siac.ufba.br/SiacWWW/ConsultarHistoricoEscolarEletronico.do';
+var URL_GRADES = 'https://siac.ufba.br/SiacWWW/ConsultarCoeficienteRendimento.do'
 
 function Ufba(parameters) {
 	this.username = parameters.username;
@@ -41,6 +42,15 @@ Ufba.prototype.getWelcome = function(callback) {
 Ufba.prototype.getTranscript = function(callback) {
 	request({
 		url: URL_TRANSCRIPT,
+		jar: this.jar
+	}, function (err, httpResponse, body) {
+		callback(body);
+	});
+};
+
+Ufba.prototype.getGrades = function(callback) {
+	request({
+		url: URL_GRADES,
 		jar: this.jar
 	}, function (err, httpResponse, body) {
 		callback(body);
