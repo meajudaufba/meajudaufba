@@ -1,0 +1,35 @@
+"ADM001" : {
+	"subjectName" : "Introdução à Administração",
+	"class": {
+		"040000": {
+			"availableEnrollment": "10",
+			"classTime": {
+				"SEG": {
+					"startingTime": "10:40",
+					"endingTime": "12:30",
+					"professorName": "Marcos Gilberto dos Santos"
+				},
+				"QUA": {
+					"startingTime": "10:40",
+					"endingTime": "12:30",
+					"professorName": "Marcos Gilberto dos Santos"
+				}
+			}
+		},
+		"060000": {
+			"availableEnrollment": "5",
+			"classTime": {
+				"SEX": {
+					"startingTime": "18:30",
+					"endingTime": "20:20",
+					"professorName": "Docente Substituto a Contratar"
+				},
+				"SEX": {
+					"startingTime": "20:20",
+					"endingTime": "22:10",
+					"professorName": "Docente Substituto a Contratar"
+				}
+			}
+		}
+	}
+}

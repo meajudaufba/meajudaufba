@@ -1,0 +1,28 @@
+"UFBA": {
+	"name": "Universidade Federal da Bahia",
+	"location": "",
+	"creation": "",
+	"concentrationArea": {
+		"A": {
+			"description": "Ciências Físicas, Matemática e Tecnologia",
+			"majorList": {
+				"112": {
+					"name": "Ciência da Computação",
+					"daytime": "",
+					"periodAmount": ""
+				},
+				"186": {
+					"name": "Engenharia da Computação",
+					"daytime": "",
+					"periodAmount": ""
+					}
+			}
+		},
+		"B": {
+			"description": "Ciëncias Biológicas e Profissôes de Saúde"
+		},
+		"C": {
+			"description": "Filosofia e Ciências Humanas"
+		}
+	}
+}
