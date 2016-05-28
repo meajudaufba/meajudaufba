@@ -6,7 +6,7 @@
 USERNAME=YOUR_USERNAME PASSWORD=YOUR_PASSWORD node server.js
 ```
 
-## Available Disciplines *
+## Available Subjects *
 *Not yet implemented.
 
 The json objects from available subjects are formatted as followed:
