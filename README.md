@@ -6,7 +6,6 @@
 USERNAME=YOUR_USERNAME PASSWORD=YOUR_PASSWORD node server.js
 ```
 
-## Disciplinas disponíveis
 ## Available Disciplines *
 *Not yet implemented.
 
