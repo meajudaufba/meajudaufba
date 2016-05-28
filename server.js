@@ -10,5 +10,11 @@ user.login(function(logged) {
 		user.getWelcome(function(res) {
 			console.log(res);
 		});
+		user.getGrades(function(res) {
+			console.log(res);
+		});
+		user.getMajorInformation(function(res) {
+			console.log(res);
+		});
 	}
 });
