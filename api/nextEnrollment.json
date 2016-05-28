@@ -1,16 +1,3 @@
-# Alumni
-
-## How to use
-
-```
-USERNAME=YOUR_USERNAME PASSWORD=YOUR_PASSWORD node server.js
-```
-
-## Disciplinas disponíveis
-
-Os objetos das matérias disponíveis são do seguinte formato:
-
-```json
 "ADM001" : {
 	"subjectName" : "Introdução à Administração",
 	"class": {
@@ -28,10 +15,21 @@ Os objetos das matérias disponíveis são do seguinte formato:
 					"professorName": "Marcos Gilberto dos Santos"
 				}
 			}
+		},
+		"060000": {
+			"availableEnrollment": "5",
+			"classTime": {
+				"SEX": {
+					"startingTime": "18:30",
+					"endingTime": "20:20",
+					"professorName": "Docente Substituto a Contratar"
+				},
+				"SEX": {
+					"startingTime": "20:20",
+					"endingTime": "22:10",
+					"professorName": "Docente Substituto a Contratar"
+				}
+			}
 		}
 	}
 }
-```
-## Todos
-
-- Verify response on login method to certify the user is indeed logged (right credentials).
