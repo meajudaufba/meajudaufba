@@ -1,5 +1,6 @@
 var Ufba = require('./api/ufba.js');
 
+var Ufba = require('./api/ufba/ufba.js');
 var user = new Ufba({
 	username: process.env.USERNAME,
 	password: process.env.PASSWORD,
