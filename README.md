@@ -7,8 +7,10 @@ USERNAME=YOUR_USERNAME PASSWORD=YOUR_PASSWORD node server.js
 ```
 
 ## Disciplinas disponíveis
+## Available Disciplines *
+*Not yet implemented.
 
-Os objetos das matérias disponíveis são do seguinte formato:
+The json objects from available subjects are formatted as followed:
 
 ```json
 "ADM001" : {
