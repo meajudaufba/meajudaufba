@@ -1,5 +1,12 @@
 var cheerio = require('cheerio'),
-	request = require('request')
+	request = require('request'),
+	iconv = require('iconv-lite');
+
+var encoding = 'iso-8859-1';
+
+String.prototype.capitalize = function() {
+    return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+};
 
 // List of the siac URLs
 var URL_LOGIN = 'https://siac.ufba.br/SiacWWW/LogonSubmit.do';
@@ -8,6 +15,7 @@ var URL_PAST_ENROLLMENTS = 'https://siac.ufba.br/SiacWWW/ConsultarComponentesCur
 var URL_TRANSCRIPT = 'https://siac.ufba.br/SiacWWW/ConsultarHistoricoEscolarEletronico.do';
 var URL_GRADES = 'https://siac.ufba.br/SiacWWW/ConsultarCoeficienteRendimento.do';
 var URL_MAJOR_INFORMATION = 'https://siac.ufba.br/SiacWWW/ConsultarCurriculoCurso.do';
+var URL_REQUIRED_COURSES = 'https://siac.ufba.br/SiacWWW/ConsultarDisciplinasObrigatorias.do';
 
 function Ufba(parameters) {
 	this.username = parameters.username;
@@ -29,11 +37,15 @@ Ufba.prototype.login = function(callback) {
 		var name = DOM('table').eq(4).find('tr td center b').html();
 
 		if (name === null) {
-			return callback(false);
+			return callback(false, false);
 		}
 
+		var info = {
+			name: name.trim().toLowerCase().capitalize()
+		};
+
 		this.logged = true;
-		return callback(true);
+		return callback(true, info);
 	});
 
 };
@@ -46,7 +58,7 @@ Ufba.prototype.getWelcome = function(callback) {
 		var DOM = cheerio.load(body, { decodeEntities: false });
 		var name = DOM('table').eq(4).find('tr td center b').html().trim();
 		callback({
-			name: name
+			name: name.replace(/\w/, str.match(/\w/)[0].toUpperCase())
 		});
 	});
 };
@@ -57,6 +69,81 @@ Ufba.prototype.getTranscript = function(callback) {
 		jar: this.jar
 	}, function (err, httpResponse, body) {
 		callback(body);
+	});
+};
+
+Ufba.prototype.getRequiredCourses = function(callback) {
+	request({
+		url: URL_REQUIRED_COURSES,
+		jar: this.jar,
+		encoding: null
+	}, function (err, httpResponse, body) {
+		var body = iconv.decode(body,encoding);
+
+		var courses = [];
+
+		var DOM = cheerio.load(body);
+		var transcriptElements = DOM('table').eq(6).find('tbody tr');
+
+		transcriptElements.each(function(i, elem) {
+			var transcriptCourse = DOM(elem);
+			var transcriptCourseData = transcriptCourse.find('td');
+			var courseName = transcriptCourseData.eq(3).text();
+			var acronymCourseName = transcriptCourseData.eq(2).html();
+			var prerequisites = transcriptCourseData.eq(4).html();
+
+			if (courseName !== null && prerequisites !== null) {
+				if (prerequisites == '--') {
+					prerequisites = []
+				} else {
+					prerequisites = prerequisites.split(',')
+				}
+
+				courses.push({
+					acronym: acronymCourseName,
+					name: courseName.trim(),
+					prerequisites: prerequisites,
+				});
+			}		
+		});
+
+		return callback(courses);
+	});
+};
+
+Ufba.prototype.getPastEnrollments = function(callback) {
+	request({
+		url: URL_PAST_ENROLLMENTS,
+		jar: this.jar
+	}, function (err, httpResponse, body) {
+		var courses = [];
+
+		var DOM = cheerio.load(body, { decodeEntities: false });
+		var transcriptElements = DOM('table').eq(7).find('tr');
+
+		transcriptElements.each(function(i, elem) {
+			var transcriptCourse = DOM(elem);
+			var transcriptCourseData = transcriptCourse.find('td');
+			var courseName = transcriptCourseData.eq(2).html();
+			var acronymCourseName = transcriptCourseData.eq(1).html();
+			var ch = transcriptCourseData.eq(3).html();
+			var nt = transcriptCourseData.eq(5).html();
+			var score = transcriptCourseData.eq(6).html();
+			var status = transcriptCourseData.eq(7).html();
+
+			if (courseName !== null && status !== null) {
+				courses.push({
+					acronym: acronymCourseName,
+					name: courseName.trim(),
+					ch: ch,
+					nt: nt,
+					score: score,
+					status: status
+				});
+			}			
+		});
+
+		return callback(courses);
 	});
 };
 
