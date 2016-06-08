@@ -18,8 +18,10 @@
   },
   "homepage": "https://github.com/Eowfenth/Alumni#readme",
   "dependencies": {
+    "body-parser": "^1.15.1",
     "cheerio": "^0.20.0",
     "express": "^4.13.4",
+    "express-session": "^1.13.0",
     "request": "^2.72.0"
   }
 }
