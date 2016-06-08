@@ -25,8 +25,15 @@ Ufba.prototype.login = function(callback) {
 		},
 		jar: this.jar
 	}, function (err, httpResponse, body) {
+		var DOM = cheerio.load(body, { decodeEntities: false });
+		var name = DOM('table').eq(4).find('tr td center b').html();
+
+		if (name === null) {
+			return callback(false);
+		}
+
 		this.logged = true;
-		callback(true);
+		return callback(true);
 	});
 
 };
