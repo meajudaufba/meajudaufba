@@ -3,7 +3,7 @@ var express 		= require('express'),
 	app 			= express(),
 	Ufba 			= require('./api/ufba/ufba.js');
 
-var PORT = 5080;
+app.set('port', (process.env.PORT || 5000));
 
 // Get base directory
 var cwd = process.cwd();
@@ -125,10 +125,10 @@ app.post('/login', function(req, res) {
 });
 
 
-app.listen(PORT, function (err) {
+app.listen(app.get('port'), function (err) {
     if (err) {
         console.error(err)
     } else {
-        console.log('App is ready at : ' + PORT);
+        console.log('App is ready at : ' + app.get('port'));
     }
 });
