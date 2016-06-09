@@ -52,6 +52,7 @@ app.post('/login', function(req, res) {
 					for (var i = 0; i < completedCourses.length; i++) {
 						var courseStatus = {
 							'AP': 1,
+							'DI': 6,
 							'RP': 2,
 							'TR': 3
 						};
@@ -83,7 +84,9 @@ app.post('/login', function(req, res) {
 							var prerequisiteAcronym = requiredCourse.prerequisites[j];
 
 							if (completedCourseStatus[prerequisiteAcronym] == undefined ||
-								completedCourseStatus[prerequisiteAcronym] != 1) {
+								(completedCourseStatus[prerequisiteAcronym] != 1 &&
+								completedCourseStatus[prerequisiteAcronym] != 6)) {
+								
 								prerequisitesMissing.push(prerequisiteAcronym);
 							}							
 						}
