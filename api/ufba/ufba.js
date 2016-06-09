@@ -34,6 +34,7 @@ Ufba.prototype.login = function(callback) {
 		jar: this.jar,
 		encoding: null
 	}, function (err, httpResponse, body) {
+		var body = iconv.decode(body,encoding);
 		try {
 			var DOM = cheerio.load(body);
 			var name = DOM('table').eq(4).find('tr td center b').html();
@@ -55,10 +56,11 @@ Ufba.prototype.login = function(callback) {
 Ufba.prototype.getWelcome = function(callback) {
 	request({
 		url: URL_WELCOME,
-		jar: this.jar
+		jar: this.jar,
+		encoding: null
 	}, function (err, httpResponse, body) {
 		var body = iconv.decode(body,encoding);
-		
+
 		var DOM = cheerio.load(body, { decodeEntities: false });
 		var name = DOM('table').eq(4).find('tr td center b').html().trim();
 		callback({
