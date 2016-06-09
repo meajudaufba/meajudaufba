@@ -1,6 +1,8 @@
 # Alumni (the name will probably change)
 
-Alumni (or "Me ajuda, UFBA!") is an node.js application intended to extract data from [Siac](https://siac.ufba.br/SiacWWW/Welcome.do) and then show this data in a better interface with more features. :)
+Alumni (or "Me ajuda, UFBA!") is an node.js application intended to extract data from [SIAC](https://siac.ufba.br/SiacWWW/Welcome.do) and then show this data in a better interface with more features. :)
+
+You can try a Pre-alpha version here: [https://meajudaufba.herokuapp.com/](https://meajudaufba.herokuapp.com/).
 
 ## Todos
 
