@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Alumni</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<style>
+	.form-signin {
+	    max-width: 330px;
+	    padding: 15px;
+	    margin: 0 auto;
+	}
+
+	.form-signin button#submit-button {
+		margin-top: 10px;
+	}
+
+	.hidded {
+		display: none;
+	}
+
+	.missing-prerequisite {
+		color: red;
+		font-weight: bold;
+	}
+
+	.footer-login {
+		text-align: center;
+		margin-top: 10px;
+	}
+	</style>
+</head>
+<body>
+	<div id="container-login" class="container">
+	    <form id="login-form" class="form-signin">
+	        <h2 class="form-signin-heading">Alumni</h2>
+			
+			<div id="alerts">
+		        <div id="alert-login" class="alert alert-info">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+					<p>
+						Esta aplicação não armazena nenhum dado sobre sua conta.
+					</p>
+		        </div>
+		    </div>
+
+	        <label for="inputCPF" class="sr-only">Email address</label>
+	        <input type="text" id="inputCPF" class="form-control" placeholder="Seu CPF" required autofocus>
+	        <label for="inputPassword" class="sr-only">Password</label>
+	        <input type="password" id="inputPassword" class="form-control" placeholder="Sua senha do Siac" required>
+	        <button id="submit-button" class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>
+
+	        <p class="footer-login">Desenvolvido por <a href="https://github.com/dygufa" target="_blank">@dygufa</a> e <a href="https://github.com/Eowfenth" target="_blank">@Eowfenth</a></p>
+	    </form>
+	</div>
+
+	<div id="container-logged" class="container hidded">
+		<div class="page-header">
+			<h1>Alumni</h1>
+		</div>
+
+		<div id="logged-content"></div>
+
+		<div class="footer">Desenvolvido por <a href="https://github.com/dygufa" target="_blank">@dygufa</a> e <a href="https://github.com/Eowfenth" target="_blank">@Eowfenth</a></div>
+	</div>
+
+	<script>
+	var submitting = false;
+
+	$('#login-form').submit(function(e) {	
+		if (submitting) {
+			return false;
+		}
+
+		submitting = true;
+
+		var cpf = $('#inputCPF').val(),
+			password = $('#inputPassword').val();
+
+		$.ajax({
+			type: 'post',
+			url: '/login',
+			data: {cpf: cpf, password: password},
+			beforeSend: function() {
+				$('#submit-button').text('Verificando...');
+			}
+		}).done(function(msg) {
+			$('#submit-button').text('Enviar');
+			submitting = false;
+
+			if (msg.ok) {
+				var content = '<p class="lead">Olá ' + msg.data.name + ', você concluiu ' + msg.data.approvedCount + ' disciplinas com sucesso. Ainda precisa cursar ' + msg.data.missingRequiredCount + ' disciplinas obrigatórias.</p>';
+
+				content += '<h4>Matérias obrigatórias:</h4>';
+				content += '<table class="table table-condensed">';
+				
+				content += '<tr>';
+					content += '<th>Código</th>';
+					content += '<th>Nome</th>';
+					content += '<th>É prérequisito de</th>';
+					content += '<th>Prérequisitos</th>';
+					content += '<th>Status</th>';
+				content += '</tr>';
+
+				for (var i = 0; i < msg.data.courses.length; i++) {
+					var course = msg.data.courses[i],
+						prerequisites = '',
+						unlockedCourses = '';
+
+					if (course.prerequisites.length == 0) {
+						prerequisites = '--';
+					} else {
+						for (var h = 0; h < course.prerequisites.length; h++) {
+							var prerequisite = course.prerequisites[h];
+							if (course.prerequisitesMissing.indexOf(prerequisite) != -1) {
+								prerequisites += '<span class="missing-prerequisite">' + prerequisite + '</span>'
+							} else {
+								prerequisites += prerequisite;
+							}
+
+							if (h < course.prerequisites.length - 1) {
+								prerequisites += ', ';
+							}
+						}
+					}
+
+					if (course.unlockedCourses.length == 0) {
+						unlockedCourses = 'Não desbloqueia nenhuma discplina';
+					} else {
+						unlockedCourses = 'Desbloqueia diretamente: ' + course.unlockedCourses.join(', ');
+					}
+
+					var statusToColorClass = {
+						1: 'success',
+						2: 'danger',
+						3: '',
+						4: '',
+						5: 'warning'
+					};
+
+					var statusToDescription = {
+						1: 'Cursou e foi aprovado',
+						2: 'Cursou e foi reprovado',
+						3: 'Cursou e trancou',
+						4: 'Não cursada',
+						5: 'Precisa cursar prérequisitos'
+					};
+
+					content += '<tr class="' + statusToColorClass[course.status] + '">';
+						content += '<td>' + course.acronym + '</td>';
+						content += '<td>' + course.name + '</td>';
+						content += '<td>' + unlockedCourses + '</td>';
+						content += '<td>' + prerequisites + '</td>';
+						content += '<td>' + statusToDescription[course.status] + '</td>';
+					content += '</tr>';
+				}
+
+				content += '</table>';
+				
+				$('#container-login').addClass('hidded');
+				$('#container-logged').removeClass('hidded')
+				$('#logged-content').html(content);
+			} else {
+				var alert = '<div class="alert alert-danger alert-dismissible fade in">';
+					alert += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>';
+					alert += '<p>';
+						alert += msg.data.msg;
+					alert += '</p>';
+		        alert += '</div>';
+
+		        console.log(alert);
+
+				$('#alerts').html(alert);
+			}
+			console.log(msg);
+		});
+
+		e.preventDefault();
+	});
+	</script>
+</body>
+</html>
