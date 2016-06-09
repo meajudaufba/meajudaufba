@@ -31,21 +31,23 @@ Ufba.prototype.login = function(callback) {
 			cpf: this.username,
 			senha: this.password
 		},
-		jar: this.jar
+		jar: this.jar,
+		encoding: null
 	}, function (err, httpResponse, body) {
-		var DOM = cheerio.load(body, { decodeEntities: false });
-		var name = DOM('table').eq(4).find('tr td center b').html();
+		try {
+			var DOM = cheerio.load(body);
+			var name = DOM('table').eq(4).find('tr td center b').html();
 
-		if (name === null) {
+			var info = {
+				name: name.trim().toLowerCase().capitalize()
+			};
+
+			this.logged = true;
+			return callback(true, info);
+		} catch (err) {
+			console.log(err);
 			return callback(false, false);
-		}
-
-		var info = {
-			name: name.trim().toLowerCase().capitalize()
-		};
-
-		this.logged = true;
-		return callback(true, info);
+		}		
 	});
 
 };
@@ -55,6 +57,8 @@ Ufba.prototype.getWelcome = function(callback) {
 		url: URL_WELCOME,
 		jar: this.jar
 	}, function (err, httpResponse, body) {
+		var body = iconv.decode(body,encoding);
+		
 		var DOM = cheerio.load(body, { decodeEntities: false });
 		var name = DOM('table').eq(4).find('tr td center b').html().trim();
 		callback({
