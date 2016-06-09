@@ -53,11 +53,14 @@ app.post('/login', function(req, res) {
 						var courseStatus = {
 							'AP': 1,
 							'DI': 6,
+							'DU': 7,
 							'RP': 2,
 							'TR': 3
 						};
 
-						if (courseStatus[completedCourses[i].status] == 1) {
+						if (courseStatus[completedCourses[i].status] == 1 ||
+							courseStatus[completedCourses[i].status] == 6 ||
+							courseStatus[completedCourses[i].status] == 7) {
 							approvedCount++;
 						}
 
@@ -85,13 +88,14 @@ app.post('/login', function(req, res) {
 
 							if (completedCourseStatus[prerequisiteAcronym] == undefined ||
 								(completedCourseStatus[prerequisiteAcronym] != 1 &&
-								completedCourseStatus[prerequisiteAcronym] != 6)) {
-								
+								completedCourseStatus[prerequisiteAcronym] != 6 &&
+								completedCourseStatus[prerequisiteAcronym] != 7)) {
+
 								prerequisitesMissing.push(prerequisiteAcronym);
 							}							
 						}
 
-						if (prerequisitesMissing.length != 0) {
+						if (status == 4 && prerequisitesMissing.length != 0) {
 							status = 5;
 						}
 
