@@ -93,7 +93,7 @@
 			submitting = false;
 
 			if (msg.ok) {
-				var content = '<p class="lead">Olá ' + msg.data.name + ', você concluiu ' + msg.data.approvedCount + ' disciplinas com sucesso. Ainda precisa cursar ' + msg.data.missingRequiredCount + ' disciplinas obrigatórias.</p>';
+				var content = '<p class="lead">Olá ' + msg.data.name + ', você concluiu ' + msg.data.approvedCount + ' disciplinas com sucesso (contando optativas). Você ainda precisa cursar ' + msg.data.missingRequiredCount + ' disciplinas que são obrigatórias.</p>';
 
 				content += '<h4>Matérias obrigatórias:</h4>';
 				content += '<table class="table table-condensed">';
