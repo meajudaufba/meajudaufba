@@ -1,3 +1,5 @@
+var dotenv = require('dotenv').config();
+
 var express 		= require('express'),
 	bodyParser      = require('body-parser'),
 	app 			= express();
@@ -17,7 +19,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(express.static(cwd + '/static'));
 
-app.use('/', routes);
+app.use('/react', express.static(cwd + '/client/build'));
+
+app.use('/api', routes);
 
 app.listen(app.get('port'), function (err) {
     if (err) {

@@ -1,3 +1,5 @@
 node_modules/
 app/lib/**/cache/*
 !app/lib/**/cache/.empty
+.env
+npm-debug.log
