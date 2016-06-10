@@ -1,0 +1,116 @@
+// Get base directory
+var cwd = process.cwd();
+
+var Ufba = require(cwd + '/app/lib/ufba/ufba.js');
+
+function unlockedCoursesBy(courseAcronym, courses, onlyDirectly) {
+	var unlockedCourses = [];
+
+	for (var i = 0; i < courses.length; i++) {
+		var course = courses[i];
+		if (course.prerequisites.indexOf(courseAcronym) !== -1) {
+			unlockedCourses.push(course.acronym);
+		}
+	}
+
+	return unlockedCourses;
+}
+
+exports.login = function(req, res) {
+	var formData        = req.body;
+
+	var user = new Ufba({
+		username: formData.cpf,
+		password: formData.password,
+	});
+
+	user.login(function(logged, info) {
+		if (logged) {
+			user.getRequiredCourses(function(requiredCourses) {
+				user.getPastEnrollments(function(completedCourses) {
+					var completedCourseStatus = {};
+					var courses = [];
+					var approvedCount = 0;
+					var missingRequiredCount = 0;
+
+					for (var i = 0; i < completedCourses.length; i++) {
+						var courseStatus = {
+							'AP': 1,
+							'DI': 6,
+							'DU': 7,
+							'RP': 2,
+							'TR': 3
+						};
+
+						if (courseStatus[completedCourses[i].status] == 1 ||
+							courseStatus[completedCourses[i].status] == 6 ||
+							courseStatus[completedCourses[i].status] == 7) {
+							approvedCount++;
+						}
+
+						completedCourseStatus[completedCourses[i].acronym] = courseStatus[completedCourses[i].status];
+					}
+
+					for (var i = 0; i < requiredCourses.length; i++) {
+						var requiredCourse = requiredCourses[i];
+						var prerequisitesMissing = [];
+
+						if (completedCourseStatus[requiredCourse.acronym] == undefined) {
+							status = 4;
+						} else {
+							status = completedCourseStatus[requiredCourse.acronym];
+						}
+
+						if (status != 1) {
+							missingRequiredCount++;
+						}
+
+						var unlockedCourses = unlockedCoursesBy(requiredCourse.acronym, requiredCourses);
+
+						for (var j = 0; j < requiredCourse.prerequisites.length; j++) {
+							var prerequisiteAcronym = requiredCourse.prerequisites[j];
+
+							if (completedCourseStatus[prerequisiteAcronym] == undefined ||
+								(completedCourseStatus[prerequisiteAcronym] != 1 &&
+								completedCourseStatus[prerequisiteAcronym] != 6 &&
+								completedCourseStatus[prerequisiteAcronym] != 7)) {
+
+								prerequisitesMissing.push(prerequisiteAcronym);
+							}							
+						}
+
+						if (status == 4 && prerequisitesMissing.length != 0) {
+							status = 5;
+						}
+
+						courses.push({
+							name: requiredCourse.name,
+							acronym: requiredCourse.acronym,
+							prerequisites: requiredCourse.prerequisites,
+							prerequisitesMissing: prerequisitesMissing,
+							unlockedCourses: unlockedCourses,
+							status: status
+						});	
+					}				
+
+					res.json({
+						ok: true,
+						data: {
+							name: info.name,
+							courses: courses,
+							missingRequiredCount: missingRequiredCount,
+							approvedCount: approvedCount
+						}
+					});
+				});
+			});
+		} else {
+			res.json({
+				ok: false,
+				data: {
+					msg: 'CPF ou senha inválidos.'
+				}
+			});
+		}
+	});
+};
