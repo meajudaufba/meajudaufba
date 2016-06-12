@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 5080;
 const WEBPACK_DEV_SERVER_PORT = process.env.WEBPACK_DEV_SERVER_PORT || 5090;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-var BUILD_DIR = path.resolve(__dirname, 'client/build');
 var APP_DIR = path.resolve(__dirname, 'client/src');
+var BUILD_DIR = path.resolve(__dirname, 'client/build');
 
 var config = {
     entry: APP_DIR + '/main.jsx',
@@ -26,7 +26,7 @@ var config = {
 	},
     plugins: [
     	new HtmlWebpackPlugin({
-            template: BUILD_DIR + '/index.html',
+            template: APP_DIR + '/index.html',
             chunksSortMode: 'dependency'
         })
     ]
