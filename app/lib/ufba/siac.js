@@ -117,11 +117,14 @@ Ufba.prototype.getRequiredCourses = function(callback) {
 	});
 };
 
-Ufba.prototype.getPastEnrollments = function(callback) {
+Ufba.prototype.getCoursesDone = function(callback) {
 	request({
 		url: URL_PAST_ENROLLMENTS,
-		jar: this.jar
+		jar: this.jar,
+		encoding: null
 	}, function (err, httpResponse, body) {
+		var body = iconv.decode(body,encoding);
+
 		var courses = [];
 
 		var DOM = cheerio.load(body, { decodeEntities: false });
