@@ -1,116 +1,151 @@
 // Get base directory
 var cwd = process.cwd();
 
-var Ufba = require(cwd + '/app/lib/ufba/ufba.js');
+var config = require(cwd + '/config.js');
 
-function unlockedCoursesBy(courseAcronym, courses, onlyDirectly) {
-	var unlockedCourses = [];
+var md5 = require('md5');
+var async = require('async');
+var jwt = require('jsonwebtoken');
 
-	for (var i = 0; i < courses.length; i++) {
-		var course = courses[i];
-		if (course.prerequisites.indexOf(courseAcronym) !== -1) {
-			unlockedCourses.push(course.acronym);
-		}
+// node cachemanager
+var cacheManager = require('cache-manager');
+// storage for the cachemanager
+var fsStore = require('cache-manager-fs');
+// initialize caching on disk
+var diskCache = cacheManager.caching({
+	store: fsStore,
+	options: {
+	 	ttl: 60*60 /* seconds */, 
+	 	maxsize: 1000*1000*1000 /* max size in bytes on disk */, 
+	 	path:'cache', 
+	 	preventfill:true
 	}
+});
 
-	return unlockedCourses;
-}
+var TOKEN_SECRET = config.TOKEN_SECRET;
+var CPF_SALT = config.CPF_SALT;
+
+var Ufba = require(cwd + '/app/lib/ufba/siac.js');
+var Supac = require(cwd + '/app/lib/ufba/supac.js');
+
+var models = require(cwd + '/app/models');
 
 exports.login = function(req, res) {
 	var formData        = req.body;
 
-	var user = new Ufba({
+	var userData = {
 		username: formData.cpf,
 		password: formData.password,
-	});
+	};
+
+	var user = new Ufba(userData);
 
 	user.login(function(logged, info) {
-		if (logged) {
-			user.getRequiredCourses(function(requiredCourses) {
-				user.getPastEnrollments(function(completedCourses) {
-					var completedCourseStatus = {};
-					var courses = [];
-					var approvedCount = 0;
-					var missingRequiredCount = 0;
+		if (!logged) {
+			return res.json({
+				success: false,
+				message: 'CPF ou senha inválidos.',
+				code: 2005
+			});	
+		}
 
-					for (var i = 0; i < completedCourses.length; i++) {
-						var courseStatus = {
-							'AP': 1,
-							'DI': 6,
-							'DU': 7,
-							'RP': 2,
-							'TR': 3
-						};
+		async.parallel({
+			majorInformations: function(callback) {
+				user.getMajorInformations(function(majorInformations) {
+					callback(null, majorInformations);
+				});
+			},
+			completedCourses: function(callback) {
+				user.getCompletedCouses(function(completedCourses) {
+					callback(null, completedCourses);
+				});
+			}
+		}, function(err, results) {
+			var majorInformations = results.majorInformations;
+			var completedCourses = results.completedCourses;
 
-						if (courseStatus[completedCourses[i].status] == 1 ||
-							courseStatus[completedCourses[i].status] == 6 ||
-							courseStatus[completedCourses[i].status] == 7) {
-							approvedCount++;
-						}
+			var cpfHash = md5(formData.cpf + CPF_SALT);
 
-						completedCourseStatus[completedCourses[i].acronym] = courseStatus[completedCourses[i].status];
-					}
+			models.user.findOrCreate({
+				where: {
+					cpfHash: cpfHash
+				}, defaults: {						
+					majorCode: majorInformations.majorCode,
+					entryPeriod: completedCourses.entryPeriod,
+					entryMethod: completedCourses.entryMethod,
+					graduationPeriod: completedCourses.graduationPeriod, 
+					graduationMethod: completedCourses.graduationMethod, 
+					courseName: completedCourses.courseName, 
+					curriculumPeriod: completedCourses.curriculumPeriod, 
+					cr: completedCourses.cr, 
+					lastVerificationSiac: models.sequelize.fn('NOW'), 
+					lastVerificationSiav: models.sequelize.fn('NOW')
+				}
+			}).spread(function(user, created) {						
+				var completedCoursesWithUserId = completedCourses.courses.map(function(completedCourse) {
+					completedCourse.userId = user.id;
+					return completedCourse;
+				});
 
-					for (var i = 0; i < requiredCourses.length; i++) {
-						var requiredCourse = requiredCourses[i];
-						var prerequisitesMissing = [];
-
-						if (completedCourseStatus[requiredCourse.acronym] == undefined) {
-							status = 4;
-						} else {
-							status = completedCourseStatus[requiredCourse.acronym];
-						}
-
-						if (status != 1) {
-							missingRequiredCount++;
-						}
-
-						var unlockedCourses = unlockedCoursesBy(requiredCourse.acronym, requiredCourses);
-
-						for (var j = 0; j < requiredCourse.prerequisites.length; j++) {
-							var prerequisiteAcronym = requiredCourse.prerequisites[j];
-
-							if (completedCourseStatus[prerequisiteAcronym] == undefined ||
-								(completedCourseStatus[prerequisiteAcronym] != 1 &&
-								completedCourseStatus[prerequisiteAcronym] != 6 &&
-								completedCourseStatus[prerequisiteAcronym] != 7)) {
-
-								prerequisitesMissing.push(prerequisiteAcronym);
-							}							
-						}
-
-						if (status == 4 && prerequisitesMissing.length != 0) {
-							status = 5;
-						}
-
-						courses.push({
-							name: requiredCourse.name,
-							acronym: requiredCourse.acronym,
-							prerequisites: requiredCourse.prerequisites,
-							prerequisitesMissing: prerequisitesMissing,
-							unlockedCourses: unlockedCourses,
-							status: status
-						});	
-					}				
+				var returnToken = function() {
+					var token = jwt.sign({userId: user.id}, TOKEN_SECRET, {
+			        	expiresIn: '30 minutes' // expires in 24 hours
+			        });	
 
 					res.json({
-						ok: true,
-						data: {
-							name: info.name,
-							courses: courses,
-							missingRequiredCount: missingRequiredCount,
-							approvedCount: approvedCount
-						}
+						success: true,
+						message: '',
+						token: token
+					});	
+				};
+
+				// Create rows for completed courses if it's the user first time
+				if (created) {
+					models.completedCourse.bulkCreate(completedCoursesWithUserId).then(function() {
+						return returnToken();
 					});
-				});
-			});
-		} else {
-			res.json({
-				ok: false,
-				data: {
-					msg: 'CPF ou senha inválidos.'
-				}
-			});
+				} else {
+					return returnToken();
+				}						
+			});	
+		});
+		
+	});
+};
+
+function getCachedCourses(majorCode, curriculumPeriod, cb) {
+	var id = 'courses-' + majorCode + '-' + curriculumPeriod;
+    diskCache.wrap(id, function (cacheCallback) {
+        Supac.getCoursesByMajorCode(majorCode, curriculumPeriod, cacheCallback);
+    }, cb);
+}
+
+exports.me = function(req, res) {
+	userId = req.decoded.userId;
+
+	models.user.findById(userId, {
+		include: [
+			{ model: models.completedCourse }
+		]
+	}).then(function(user) {
+		if (!user) {
+			return res.json({
+				success: false,
+				message: 'Usuário extraido do token não é válido.',
+				code: 2006
+			});	
 		}
+
+		var majorCode = user.majorCode;
+		var curriculumPeriod = user.curriculumPeriod.replace('.', '');
+
+		getCachedCourses(majorCode, curriculumPeriod, function(err, courses) {
+			res.json({
+				success: true,
+				message: '',
+				courses: courses,
+				completedCourses: user.completedCourses 
+			});	
+		});
 	});
 };

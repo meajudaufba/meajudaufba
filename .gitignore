@@ -1,5 +1,6 @@
 node_modules/
-app/lib/**/cache/*
-!app/lib/**/cache/.empty
+client/build/*
+!client/build/.empty
+cache/*
 .env
 npm-debug.log
