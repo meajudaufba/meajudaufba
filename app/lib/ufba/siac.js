@@ -117,7 +117,7 @@ Ufba.prototype.getRequiredCourses = function(callback) {
 	});
 };
 
-Ufba.prototype.getCoursesDone = function(callback) {
+Ufba.prototype.getCompletedCouses = function(callback) {
 	request({
 		url: URL_PAST_ENROLLMENTS,
 		jar: this.jar,
@@ -128,31 +128,68 @@ Ufba.prototype.getCoursesDone = function(callback) {
 		var courses = [];
 
 		var DOM = cheerio.load(body, { decodeEntities: false });
+
+		var infoTable = DOM('table').eq(6).find('tr');
+		var studentId = infoTable.find('td').eq(0).text().replace('MATRÍCULA:', '').trim();
+		var studentName = infoTable.find('td').eq(1).text().replace('NOME:', '').trim();
+		var entryPeriod = infoTable.find('td').eq(3).text().replace('PERÍODO DE INGRESSO:', '').trim();
+		var entryMethod = infoTable.find('td').eq(4).text().replace('FORMA DE INGRESSO:', '').trim();
+		var graduationPeriod = infoTable.find('td').eq(6).text().replace('PERÍODO DE SAÍDA:', '').trim();
+		var graduationMethod = infoTable.find('td').eq(7).text().replace('FORMA DE SAÍDA:', '').trim();
+		var courseName = infoTable.find('td').eq(9).text().replace('CURSO:', '').trim();
+		var curriculumPeriod = infoTable.find('td').eq(10).text().replace('CURRÍCULO:', '').trim();
+		var cr = infoTable.find('td').eq(11).text().replace('CR:', '').trim();
+
 		var transcriptElements = DOM('table').eq(7).find('tr');
+
+		var period = '';
 
 		transcriptElements.each(function(i, elem) {
 			var transcriptCourse = DOM(elem);
 			var transcriptCourseData = transcriptCourse.find('td');
-			var courseName = transcriptCourseData.eq(2).html();
+			var periodTd = transcriptCourseData.eq(0).text().replace('&nbsp;', '').trim();
 			var acronymCourseName = transcriptCourseData.eq(1).html();
+			var courseName = transcriptCourseData.eq(2).html();
 			var ch = transcriptCourseData.eq(3).html();
 			var nt = transcriptCourseData.eq(5).html();
 			var score = transcriptCourseData.eq(6).html();
 			var status = transcriptCourseData.eq(7).html();
 
+			if (periodTd != '') {
+				period = periodTd;
+			}			
+
 			if (courseName !== null && status !== null) {
+				acronymCourseName = acronymCourseName.trim();
+				courseName = courseName.trim();
+
+				if (acronymCourseName == '') {
+					acronymCourseName = 'SPECIAL';
+				}
 				courses.push({
 					acronym: acronymCourseName,
-					name: courseName.trim(),
+					name: courseName,
 					ch: ch,
 					nt: nt,
 					score: score,
-					status: status
+					status: status,
+					period: period
 				});
 			}			
 		});
 
-		return callback(courses);
+		return callback({
+			studentId: studentId,
+			studentName: studentName,
+			entryPeriod: entryPeriod,
+			entryMethod: entryMethod,
+			graduationPeriod: graduationPeriod,
+			graduationMethod: graduationMethod,
+			courseName: courseName,
+			curriculumPeriod: curriculumPeriod,
+			cr: cr,
+			courses: courses
+		});
 	});
 };
 
@@ -171,11 +208,14 @@ Ufba.prototype.getGrades = function(callback) {
 	});
 };
 
-Ufba.prototype.getMajorInformation = function(callback) {
+Ufba.prototype.getMajorInformations = function(callback) {
 	request({
 		url: URL_MAJOR_INFORMATION,
-		jar: this.jar
+		jar: this.jar,
+		encoding: null
 	}, function (err, httpResponse, body) {
+		var body = iconv.decode(body,encoding);
+
 		var DOM = cheerio.load(body, { decodeEntities: false});
 		var majorMinCode = DOM('.even td').html().trim().slice(0, 3);
 		var majorCode = DOM('.even td').html().trim().slice(0, 6);
@@ -187,19 +227,18 @@ Ufba.prototype.getMajorInformation = function(callback) {
 		var avgDuration = DOM('tr.even td').eq(12).html().trim().slice(14);
 		var professionDescription = DOM('.simple tr.even').eq(2).text().trim();
 
-		// workLoad
-			// Complementary Time;
 		var majorComplementaryTime = DOM('tr.odd td').eq(2).html();
 		var studentComplementaryTime = DOM('tr.odd td').eq(3).html();
-			// Mandatory time
+
 		var majorMandatoryTime = DOM('tr.even td').eq(9).html();
 		var studentMandatoryTime = DOM('tr.even td').eq(10).html();
-			// Elective time
+
 		var majorElectiveTime = DOM('tr.odd td').eq(6).html();;
 		var studentElectiveTime = DOM('tr.odd td').eq(7).html();;
 
 		var majorTotalTime;
 		var studentTotalTime;
+
 		callback({
 			majorMinCode: majorMinCode,
 			majorCode: majorCode,
