@@ -9,7 +9,9 @@ class CoursesTableRowComponent extends React.Component {
 			4: {className: '', description: 'Não cursada'},
 			5: {className: 'warning', description: 'Precisa cursar prérequisitos'},
 			6: {className: 'success', description: 'Dispensado'},
-			7: {className: 'success', description: 'Dispensado'}
+			7: {className: 'success', description: 'Dispensado'},
+			8: {className: 'info', description: 'Cursando'},
+			9: {className: '', description: 'Status desconhecido'}
 		};
 
 		let course = this.props.course;
@@ -34,13 +36,15 @@ class CoursesTableRowComponent extends React.Component {
 			)
 		});
 
+		var status =  statusTo[course.status];
+
 		return (
-			<tr className={statusTo[course.status].className}>
+			<tr className={status.className}>
 				<td>{course.acronym}</td>
 				<td>{course.name}</td>
 				<td>{prerequisiteOf}</td>
 				<td>{prerequisites}</td>
-				<td>{statusTo[course.status].description}</td>
+				<td>{status.description}</td>
 			</tr>
 		)
 	}

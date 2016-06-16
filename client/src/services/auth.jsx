@@ -12,7 +12,6 @@ module.exports = {
             url: '/api/login',
             data: {cpf: cpf, password: pass},
             success: (res) => {
-                console.log(res);
                 if (res.success) {
                     localStorage.token = res.token
                     if (cb) cb(true)

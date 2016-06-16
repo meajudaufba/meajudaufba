@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter } from 'react-router';
 import Auth from '../services/auth.jsx';
 
 class AppComponent extends React.Component {
@@ -23,7 +24,7 @@ class AppComponent extends React.Component {
 						courses: res.courses,
 						completedCourses: res.completedCourses
 					});
-				} else if (res.code == 2001) {
+				} else if (res.code == 2001 || res.code == 2006) {
 					Auth.logout();
 					this.props.router.replace('/login');
 				}
@@ -52,4 +53,4 @@ class AppComponent extends React.Component {
 
 
 
-export default AppComponent;
+export default withRouter(AppComponent);

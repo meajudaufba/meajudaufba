@@ -31,12 +31,18 @@ class CoursesTableComponent extends React.Component {
 
 			course.missingPrerequisites = course.prerequisites.diff(completedCoursesAcronyms);
 
-			let indexCourseDone = completedCoursesAcronyms.lastIndexOf(course.acronym);
+			let indexCompletedCourse = completedCoursesAcronyms.lastIndexOf(course.acronym);
+			let completedCourse = this.props.completedCourses[indexCompletedCourse];
 
-			if (indexCourseDone === -1) {
+			if (indexCompletedCourse === -1) {
 				status = course.missingPrerequisites.length ? 5 : 4;
+			} else if (courseStatus[completedCourse.status]) {
+				status = courseStatus[completedCourse.status];
+			} else if (completedCourse.status == '--' && completedCourse.nt != '--') {
+				status = 8; // Currently enrolled
 			} else {
-				status = courseStatus[this.props.completedCourses[indexCourseDone].status];
+				console.log('Unknown status: ' + completedCourse);
+				status = 9; // Unknown status
 			}
 
 			course.status = status;
