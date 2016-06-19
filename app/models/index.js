@@ -9,7 +9,7 @@ var Sequelize = require('sequelize');
 	models_path = process.cwd() + '/app/models',
     db = {};
 
-var sequelize = new Sequelize(config.MYSQL_DB_URL, {
+var sequelize = new Sequelize(config.POSTGRES_DB_URL, {
     logging: false
 });
 
