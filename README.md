@@ -2,7 +2,7 @@
 
 "Me ajuda, UFBA!" is a node.js application intended to extract data from [SIAC](https://siac.ufba.br/SiacWWW/Welcome.do) and show it in a better interface with more features. :)
 
-You can try the version 0.1.2 here: [http://meajudaufba.dygufa.com/](http://meajudaufba.herokuapp.com/).
+You can try the version 0.1.3 here: [http://meajudaufba.dygufa.com/](http://meajudaufba.dygufa.com/).
 
 ## Development
 
