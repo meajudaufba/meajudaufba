@@ -54,7 +54,7 @@ class LoginComponent extends React.Component {
 			        <div className="alert alert-info">
 						<button type="button" className="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
 						<p>
-							Esta aplicação não armazena <b>NENHUM</b> dado sobre sua conta.
+							Esta aplicação não armazena sua senha.
 						</p>
 			        </div>
 
