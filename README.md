@@ -6,9 +6,9 @@ You can try the version 0.1.2 here: [http://meajudaufba.dygufa.com/](http://meaj
 
 ## Development
 
-If you are interested in colaborating with this project or if you are just curious about you have two options to "easily" run this code:
+If you are interested in collaborating with this project or if you are just curious about it, you have two options to "easily" run this code:
 
-### For both
+### In both cases
 
 1. Download this repo: `git clone https://github.com/Eowfenth/Alumni.git meajudaufba`
 2. Go into it: `cd meajudaufba`
@@ -16,18 +16,18 @@ If you are interested in colaborating with this project or if you are just curio
 
 ### Without Docker (recommended)
 
-After you have accomplished the steps above if you don't already have it you will need to [install node.js](https://nodejs.org/en/download/package-manager/). Once you have node.js and npm as well:
+Once you have accomplished the steps above, if you don't already have it you will need to [install node.js](https://nodejs.org/en/download/package-manager/) and then:
 
 1. Run `npm install`
-2. Run `npm start` to run in "production" mode
+2. Eexecute `npm run build` and then `npm start` to run it in "production" mode
 3. Or `npm dev` to run in "development mode" using webpack-dev-server.
 
 ### Developing using Docker 
 
 As you may have seen, we have a Dockerfile on the repo. It means that you can:
 
-1. If you are already on the meajudaufba directory you first need to build an docker image: `docker build -t meajudaufba .`
-2. Then you can run using: `docker run -p 8090:8090 --env-file ./.env meajudaufba`. In this case .env defines PORT as 8090.
+1. If you are already on meajudaufba directory: build a docker image by running: `docker build --rm -t meajudaufba .`
+2. Run: `docker run -p 8090:8090 --env-file ./.env meajudaufba` to create a container. In this case .env defines PORT as 8090.
 
 In order to make your life easier to debug while you make modifications on files you can use the option --volume (on docker run) to link your "real code" directory with the "container code" directory.
 

@@ -1,4 +1,4 @@
-var dotenv = require('dotenv').config();
+var dotenv = require('dotenv').config({silent: true});
 var webpack = require('webpack');
 var webpackMerge = require('webpack-merge');
 var HtmlWebpackPlugin = require('html-webpack-plugin');

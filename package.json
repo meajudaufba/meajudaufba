@@ -1,11 +1,12 @@
 {
     "name": "Alumni",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "",
     "main": "main.js",
     "scripts": {
-        "start": "webpack && node main.js",
-        "dev": "nodemon app.js & webpack-dev-server --inline"
+        "build": "NODE_ENV=production webpack",
+        "start": "node main.js",
+        "dev": "NODE_ENV=development nodemon app.js & webpack-dev-server --inline"
     },
     "repository": {
         "type": "git",
