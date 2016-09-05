@@ -10,9 +10,9 @@ If you are interested in collaborating with this project or if you are just curi
 
 ### In both cases
 
-1. Download this repo: `git clone https://github.com/Eowfenth/Alumni.git meajudaufba`
+1. Download this repo: `git clone https://github.com/meajudaufba/meajudaufba.git meajudaufba`
 2. Go into it: `cd meajudaufba`
-3. Create a .env file with your enviroment variables using .env.example as example. 
+3. Create a .env file with your enviroment variables using .env.example as example.
 
 ### Without Docker (recommended)
 
@@ -22,7 +22,7 @@ Once you have accomplished the steps above, if you don't already have it you wil
 2. Eexecute `npm run build` and then `npm start` to run it in "production" mode
 3. Or `npm dev` to run in "development mode" using webpack-dev-server.
 
-### Developing using Docker 
+### Developing using Docker
 
 As you may have seen, we have a Dockerfile on the repo. It means that you can:
 
@@ -37,6 +37,6 @@ In order to make your life easier to debug while you make modifications on files
 - ~~Verify response on login method to certify the user is indeed logged (right credentials);~~
 - ~~Rewrite client application using React.~~
 - Improve interface with material design or similar
-- Implement a dashboard, a score page and a 
+- Implement a dashboard, a score page and a
 teacher approval rate page.
 - Make a hotsite for root path
