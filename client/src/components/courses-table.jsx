@@ -1,9 +1,12 @@
 import React from 'react';
+import findLast from "lodash/findLast";
 
 import CoursesTableRowComponent from './courses-table-row.jsx';
 
 Array.prototype.diff = function(a) {
-    return this.filter(function(i) {return a.indexOf(i) < 0;});
+    return this.filter(function(i) {
+		return a.indexOf(i) < 0;
+	});
 };
 
 class CoursesTableComponent extends React.Component {
@@ -19,22 +22,22 @@ class CoursesTableComponent extends React.Component {
 			'TR': 3  // Trancamento
 		};
 
-		let completedCoursesAcronyms = [];
 
-		this.props.completedCourses.map(courseDone => {
-			completedCoursesAcronyms.push(courseDone.acronym);
+		let completedCoursesAcronyms = this.props.completedCourses
+		.filter(course => {
+			return ['AP', 'AA', 'AM', 'MF'].indexOf(course.status) !== -1
+		})
+		.map(courseDone => {
+			return courseDone.acronym;
 		});
 
-		var courseRows = this.props.courses.map((requiredCourse) => {
-			let course = requiredCourse;
+		var courseRows = this.props.courses.map((course) => {
 			let status = 0;
+			course.missingPrerequisites = course.prerequisites.filter(x => completedCoursesAcronyms.indexOf(x) === -1);
 
-			course.missingPrerequisites = course.prerequisites.diff(completedCoursesAcronyms);
+			let completedCourse = findLast(this.props.completedCourses, c => c.acronym === course.acronym);
 
-			let indexCompletedCourse = completedCoursesAcronyms.lastIndexOf(course.acronym);
-			let completedCourse = this.props.completedCourses[indexCompletedCourse];
-
-			if (indexCompletedCourse === -1) {
+			if (!completedCourse) {
 				status = course.missingPrerequisites.length ? 5 : 4;
 			} else if (courseStatus[completedCourse.status]) {
 				status = courseStatus[completedCourse.status];

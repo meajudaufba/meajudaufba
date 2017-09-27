@@ -36,6 +36,7 @@ In order to make your life easier to debug while you make modifications on files
 
 - ~~Verify response on login method to certify the user is indeed logged (right credentials);~~
 - ~~Rewrite client application using React.~~
+- Add upgrade routine to courses status for old users
 - Improve interface with material design or similar
 - Implement a dashboard, a score page and a
 teacher approval rate page.

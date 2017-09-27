@@ -17,8 +17,8 @@ var diskCache = cacheManager.caching({
 	options: {
 	 	ttl: 60*60 /* seconds */, 
 	 	maxsize: 1000*1000*1000 /* max size in bytes on disk */, 
-	 	path:'cache', 
-	 	preventfill:true
+	 	path: 'cache', 
+	 	preventfill: true
 	}
 });
 
@@ -81,7 +81,7 @@ exports.login = function(req, res) {
 					lastVerificationSiac: models.sequelize.fn('NOW'), 
 					lastVerificationSiav: models.sequelize.fn('NOW')
 				}
-			}).spread(function(user, created) {						
+			}).spread(function(user, created) {					
 				var completedCoursesWithUserId = completedCourses.courses.map(function(completedCourse) {
 					completedCourse.userId = user.id;
 					return completedCourse;
@@ -116,8 +116,12 @@ exports.login = function(req, res) {
 function getCachedCourses(majorCode, curriculumPeriod, cb) {
 	var id = 'courses-' + majorCode + '-' + curriculumPeriod;
     diskCache.wrap(id, function (cacheCallback) {
-        Supac.getCoursesByMajorCode(majorCode, curriculumPeriod, cacheCallback);
-    }, cb);
+		Supac.getCoursesByMajorCode(majorCode, curriculumPeriod, function (err, courses) {
+			cacheCallback(err, courses);
+		});	
+	}, cb);
+	
+	
 }
 
 exports.me = function(req, res) {

@@ -4,6 +4,10 @@ var cheerio = require('cheerio'),
 
 var encoding = 'iso-8859-1';
 
+var trim = function (str) {
+	return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+}
+
 String.prototype.format = function() {
     var str = this.toString();
     if (!arguments.length)
@@ -64,7 +68,7 @@ getRequiredCourses = function(requestOptions, callback) {
 				courses.push({
 					acronym: acronymCourseName,
 					name: courseName.trim(),
-					prerequisites: prerequisites,
+					prerequisites: prerequisites.map(trim),
 				});
 			}		
 		});

@@ -21,7 +21,7 @@ var config = {
 	    loaders: [{
 	        test: /\.jsx?/,
 	        include: APP_DIR,
-	        loader: 'babel'
+	        loader: 'babel-loader'
 	    }]
 	},
     plugins: [
@@ -42,9 +42,8 @@ if (NODE_ENV == 'development') {
 	            aggregateTimeout: 300,
 	            poll: 1000
 	        },
-	        outputPath: BUILD_DIR,
 	        proxy: {
-	            '/api*': {
+	            '/api': {
 	                target: {
 	                    host: 'localhost',
 	                    port: PORT
@@ -54,5 +53,7 @@ if (NODE_ENV == 'development') {
 	    }
 	});
 }
+
+console.log(config);
 
 module.exports = config;
