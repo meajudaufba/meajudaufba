@@ -15,10 +15,10 @@ var fsStore = require('cache-manager-fs');
 var diskCache = cacheManager.caching({
 	store: fsStore,
 	options: {
-	 	ttl: 60*60 /* seconds */, 
-	 	maxsize: 1000*1000*1000 /* max size in bytes on disk */, 
-	 	path: 'cache', 
-	 	preventfill: true
+		ttl: 60*60 /* seconds */, 
+		maxsize: 1000*1000*1000 /* max size in bytes on disk */, 
+		path: 'cache', 
+		preventfill: true
 	}
 });
 
@@ -40,7 +40,7 @@ exports.login = function(req, res) {
 
 	var user = new Ufba(userData);
 
-	user.login(function(logged, info) {
+	user.login(function(logged) {
 		if (!logged) {
 			return res.json({
 				success: false,
@@ -81,7 +81,7 @@ exports.login = function(req, res) {
 					lastVerificationSiac: models.sequelize.fn('NOW'), 
 					lastVerificationSiav: models.sequelize.fn('NOW')
 				}
-			}).spread(function(user, created) {					
+			}).spread(async function(user) {					
 				var completedCoursesWithUserId = completedCourses.courses.map(function(completedCourse) {
 					completedCourse.userId = user.id;
 					return completedCourse;
@@ -89,8 +89,8 @@ exports.login = function(req, res) {
 
 				var returnToken = function() {
 					var token = jwt.sign({userId: user.id}, TOKEN_SECRET, {
-			        	expiresIn: '30 minutes' // expires in 24 hours
-			        });	
+						expiresIn: '30 minutes' // expires in 24 hours
+					});	
 
 					res.json({
 						success: true,
@@ -99,14 +99,15 @@ exports.login = function(req, res) {
 					});	
 				};
 
-				// Create rows for completed courses if it's the user first time
-				if (created) {
-					models.completedCourse.bulkCreate(completedCoursesWithUserId).then(function() {
-						return returnToken();
-					});
-				} else {
+				await models.completedCourse.destroy({
+					where: {
+						userId: user.id
+					}
+				});
+
+				models.completedCourse.bulkCreate(completedCoursesWithUserId).then(function () {
 					return returnToken();
-				}						
+				});					
 			});	
 		});
 		
@@ -115,7 +116,7 @@ exports.login = function(req, res) {
 
 function getCachedCourses(majorCode, curriculumPeriod, cb) {
 	var id = 'courses-' + majorCode + '-' + curriculumPeriod;
-    diskCache.wrap(id, function (cacheCallback) {
+	diskCache.wrap(id, function (cacheCallback) {
 		Supac.getCoursesByMajorCode(majorCode, curriculumPeriod, function (err, courses) {
 			cacheCallback(err, courses);
 		});	
@@ -125,7 +126,7 @@ function getCachedCourses(majorCode, curriculumPeriod, cb) {
 }
 
 exports.me = function(req, res) {
-	userId = req.decoded.userId;
+	const userId = req.decoded.userId;
 
 	models.user.findById(userId, {
 		include: [
